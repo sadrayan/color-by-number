@@ -1,0 +1,45 @@
+terraform {
+  required_version = ">= 1.6.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  # Uncomment after creating the S3 backend (see README)
+  # backend "s3" {
+  #   bucket         = "your-tf-state-bucket"
+  #   key            = "color-by-number/terraform.tfstate"
+  #   region         = "us-east-1"
+  #   dynamodb_table = "tf-state-lock"
+  #   encrypt        = true
+  # }
+}
+
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = {
+      Project     = var.project_name
+      Environment = var.environment
+      ManagedBy   = "terraform"
+    }
+  }
+}
+
+# us-east-1 provider required for CloudFront ACM certificates
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project     = var.project_name
+      Environment = var.environment
+      ManagedBy   = "terraform"
+    }
+  }
+}
