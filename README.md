@@ -71,7 +71,7 @@ cd terraform
 terraform init
 ```
 
-State is stored remotely in S3 (`terraform-state-golden-capybara`) with DynamoDB locking (`terraform-state-lock`). Both were pre-created via AWS CLI.
+State is stored remotely in S3 (`terraform-state-golden-capybara`) with native S3 locking (`use_lockfile = true`). The bucket was pre-created via AWS CLI.
 
 ### Common commands
 

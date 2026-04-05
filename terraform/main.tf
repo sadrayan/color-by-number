@@ -12,7 +12,7 @@ terraform {
     bucket         = "terraform-state-golden-capybara"
     key            = "color-by-number/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-state-lock"
+    use_lockfile   = true
     encrypt        = true
   }
 }
