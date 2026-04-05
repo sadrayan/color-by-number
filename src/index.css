@@ -1,0 +1,757 @@
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:          #000000;
+  --surface:     #111111;
+  --surface2:    #1c1c1c;
+  --border:      #444444;
+  --border-subtle: #2a2a2a;
+  --text:        #f0efe8;
+  --muted:       #696969;
+  --accent:      #edb926;
+  --accent-dk:   #c99d1a;
+  --accent-lt:   #f1d217;
+  --accent-glow: rgba(237,185,38,0.15);
+  --radius:      10px;
+  --shadow:      0 2px 16px rgba(0,0,0,0.6);
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+h1, h2, h3, .puzzle-title, .completion-card h2 {
+  font-family: 'Syne', system-ui, sans-serif;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  transition: filter 0.15s, transform 0.1s, box-shadow 0.15s;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn:not(:disabled):active { transform: scale(0.96); }
+
+/* shine sweep on hover */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.4s;
+}
+.btn:not(:disabled):hover::after { transform: translateX(100%); }
+
+/* Primary — gold gradient */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-lt) 0%, var(--accent) 60%, var(--accent-dk) 100%);
+  color: #000;
+  box-shadow: 0 2px 12px rgba(237,185,38,0.3);
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 20px rgba(237,185,38,0.5);
+  transform: translateY(-1px);
+}
+
+/* Secondary — dark gradient with gold border */
+.btn-secondary {
+  background: linear-gradient(135deg, var(--surface2) 0%, #141414 100%);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Ghost — gradient border via pseudo-element */
+.btn-ghost {
+  background: var(--bg);
+  color: var(--muted);
+  border: none;
+  padding-top: calc(0.5rem + 1px);
+  padding-bottom: calc(0.5rem + 1px);
+}
+.btn-ghost::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--border) 0%, var(--accent) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.btn-ghost:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+.btn-ghost:hover:not(:disabled)::before { opacity: 1; }
+
+.btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+.btn-sm.btn-ghost {
+  padding-top: calc(0.3rem + 1px);
+  padding-bottom: calc(0.3rem + 1px);
+}
+
+/* ── Gallery page ────────────────────────────────────────────────────────── */
+.site-header {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+}
+.site-header h1 {
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--accent-lt) 0%, var(--accent) 60%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle { color: var(--muted); margin-top: 0.35rem; }
+
+.gallery-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+.gallery h2,
+.import-section h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Puzzle card ─────────────────────────────────────────────────────────── */
+.puzzle-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s;
+}
+.puzzle-card:hover {
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(237,185,38,0.12);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.puzzle-thumb {
+  width: 120px;
+  height: 120px;
+  image-rendering: pixelated;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+.puzzle-card-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+.puzzle-name { font-weight: 700; }
+.puzzle-size { font-size: 0.78rem; color: var(--muted); }
+
+/* ── Import section ──────────────────────────────────────────────────────── */
+.import-section { margin-top: 1rem; }
+
+.import-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.drop-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+.drop-icon { font-size: 2.2rem; }
+.drop-zone p { margin-top: 0.5rem; color: var(--muted); }
+.file-link { color: var(--accent); cursor: pointer; text-decoration: underline; }
+
+/* ── Import preview layout ───────────────────────────────────────────────── */
+.import-preview-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.import-preview-main {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preview-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.preview-canvas-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.puzzle-preview-canvas {
+  image-rendering: pixelated;
+  display: block;
+  max-width: 100%;
+  transition: opacity 0.2s;
+}
+
+.preview-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.spinner {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.preview-palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.preview-swatch {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.preview-palette-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-left: 0.2rem;
+}
+
+.import-preview-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.import-original-thumb {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.import-original-thumb img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.options-form {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.options-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.options-form input,
+.options-form select {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.options-form input:focus,
+.options-form select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.import-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+/* ── Puzzle play page ────────────────────────────────────────────────────── */
+.puzzle-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.puzzle-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.back-link {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 0;
+}
+.back-link:hover { color: var(--accent); }
+
+.puzzle-title {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--accent);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+.progress-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.puzzle-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.canvas-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.canvas-wrapper canvas {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.8);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* ── Palette ─────────────────────────────────────────────────────────────── */
+.palette-sidebar {
+  width: 130px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border-subtle);
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.palette-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.palette {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: transparent;
+  transition: border-color 0.12s, background 0.12s;
+  width: 100%;
+}
+.swatch::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--color);
+  border: 1px solid rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+.swatch-num {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.swatch:hover { background: var(--surface2); border-color: var(--border); }
+.swatch.selected { border-color: var(--accent); background: var(--accent-glow); }
+
+.shape-toggle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.shape-toggle {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.shape-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.shape-btn:hover { background: var(--surface2); color: var(--text); }
+.shape-btn.active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.error-check-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-lt) 0%, var(--accent) 60%, var(--accent-dk) 100%);
+  color: #000;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(237,185,38,0.25);
+  transition: filter 0.15s, box-shadow 0.15s, transform 0.1s;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+.error-check-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.4s;
+}
+.error-check-btn:hover::after { transform: translateX(100%); }
+.error-check-btn:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 16px rgba(237,185,38,0.45);
+  transform: translateY(-1px);
+}
+.error-check-btn:active { transform: scale(0.96); }
+.error-check-btn.active {
+  background: linear-gradient(135deg, #ff6b6b 0%, #dc2626 60%, #b91c1c 100%);
+  box-shadow: 0 2px 10px rgba(220,38,38,0.35);
+  color: #fff;
+}
+
+.palette-hint {
+  margin-top: auto;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── Completion overlay ──────────────────────────────────────────────────── */
+.completion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+.completion-card {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.8), 0 0 40px rgba(237,185,38,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.completion-icon { font-size: 2.5rem; }
+.completion-card h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+.completion-preview {
+  image-rendering: pixelated;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  max-width: 240px;
+  max-height: 240px;
+  width: 100%;
+}
+.completion-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+/* ── Touch UX ────────────────────────────────────────────────────────────── */
+button, label, .swatch, .shape-btn, .error-check-btn, .back-link, .file-link {
+  touch-action: manipulation;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .gallery-page { padding: 0 1rem 2.5rem; }
+  .site-header { padding: 2rem 1rem 1.25rem; }
+  .import-preview-sidebar { width: 180px; }
+}
+
+/* Large phones / small tablets — stack import preview */
+@media (max-width: 600px) {
+  .import-preview-layout { flex-direction: column; }
+
+  .import-preview-sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .import-original-thumb { width: 100px; }
+  .import-original-thumb img { width: 100px; height: 100px; }
+
+  .options-form { min-width: 0; flex: 1; }
+
+  .import-actions { flex-direction: column; }
+  .import-actions .btn { width: 100%; justify-content: center; }
+}
+
+/* Phones — flip puzzle layout, compact everything */
+@media (max-width: 540px) {
+  /* Gallery */
+  .site-header { padding: 1.5rem 1rem 1rem; }
+  .site-header h1 { font-size: 1.75rem; }
+  .puzzle-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; }
+
+  /* Puzzle layout: canvas on top, palette strip on bottom */
+  .puzzle-layout { flex-direction: column; }
+
+  .canvas-wrapper { padding: 0.6rem; }
+
+  .palette-sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    gap: 0.4rem;
+    overflow-y: visible;
+  }
+
+  /* Hide labels and hints that don't fit in the strip */
+  .palette-title, .palette-hint { display: none; }
+
+  .palette { flex-direction: row; flex-wrap: wrap; gap: 0.35rem; }
+
+  /* Swatches: colour dot only, no number label */
+  .swatch {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 8px;
+  }
+  .swatch::before { width: 20px; height: 20px; }
+  .swatch-num { display: none; }
+
+  /* Shape toggle: icon buttons only, inline */
+  .shape-toggle-section { flex-direction: row; align-items: center; gap: 0.3rem; }
+  .shape-btn { width: 36px; height: 36px; padding: 0; flex: none; }
+
+  /* Error button: compact, auto width */
+  .error-check-btn {
+    width: auto;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  /* Puzzle header: tighten up */
+  .puzzle-header { padding: 0.5rem 0.75rem; gap: 0.5rem; }
+  .back-link { font-size: 0.8rem; }
+  .back-link .back-label { display: none; }
+  .puzzle-title { font-size: 0.95rem; }
+  .progress-label { font-size: 0.8rem; min-width: 2rem; }
+  .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+
+  /* Completion card */
+  .completion-card { padding: 1.5rem 1rem; }
+  .completion-card h2 { font-size: 1.2rem; }
+  .completion-icon { font-size: 2rem; }
+
+  /* Import card */
+  .import-card { padding: 1rem; }
+  .drop-zone { padding: 1.75rem 1rem; }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+  .site-header h1 { font-size: 1.5rem; }
+  .puzzle-grid { grid-template-columns: 1fr 1fr; }
+  .swatch { width: 32px; height: 32px; }
+  .shape-btn { width: 32px; height: 32px; }
+}
