@@ -55,6 +55,66 @@ Puzzle format:
 
 `0` is the background (transparent) cell — it cannot be filled.
 
+## Infrastructure (Terraform)
+
+All infrastructure is defined in `terraform/` and deploys a secure VPC, private S3 bucket, and CloudFront distribution to AWS.
+
+### Prerequisites
+
+- [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.6.0
+- AWS CLI configured with sufficient permissions
+
+### First-time setup
+
+```bash
+cd terraform
+terraform init
+```
+
+State is stored remotely in S3 (`terraform-state-golden-capybara`) with DynamoDB locking (`terraform-state-lock`). Both were pre-created via AWS CLI.
+
+### Common commands
+
+```bash
+# Preview changes without applying
+terraform plan
+
+# Apply changes
+terraform apply
+
+# Destroy all infrastructure
+terraform destroy
+
+# Show current state outputs (CloudFront URL, bucket name, etc.)
+terraform output
+
+# Refresh outputs without making changes
+terraform apply -refresh-only
+```
+
+### Deploy the app
+
+After `terraform apply`, upload the built app and invalidate the CloudFront cache:
+
+```bash
+# Build the app
+npm run build
+
+# Upload to S3 (get bucket name from terraform output)
+aws s3 sync dist/ s3://$(terraform -chdir=terraform output -raw s3_bucket_name) --delete
+
+# Invalidate CloudFront cache (get distribution ID from terraform output)
+aws cloudfront create-invalidation \
+  --distribution-id $(terraform -chdir=terraform output -raw cloudfront_distribution_id) \
+  --paths "/*"
+```
+
+The live URL is available via:
+
+```bash
+terraform -chdir=terraform output cloudfront_url
+```
+
 ## Project structure
 
 ```
