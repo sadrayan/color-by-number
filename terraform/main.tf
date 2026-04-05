@@ -8,14 +8,13 @@ terraform {
     }
   }
 
-  # Uncomment after creating the S3 backend (see README)
-  # backend "s3" {
-  #   bucket         = "your-tf-state-bucket"
-  #   key            = "color-by-number/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "tf-state-lock"
-  #   encrypt        = true
-  # }
+  backend "s3" {
+    bucket         = "terraform-state-golden-capybara"
+    key            = "color-by-number/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock"
+    encrypt        = true
+  }
 }
 
 provider "aws" {
