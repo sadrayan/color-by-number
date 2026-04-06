@@ -5,7 +5,13 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  description = "Project name used for resource naming and tagging"
+  description = "Project name used for tagging"
+  type        = string
+  default     = "color-by-number"
+}
+
+variable "prefix" {
+  description = "Prefix applied to all resource names"
   type        = string
   default     = "color-by-number"
 }

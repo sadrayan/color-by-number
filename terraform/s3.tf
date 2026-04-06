@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "aws_s3_bucket" "app" {
-  bucket = "${var.project_name}-${var.environment}-app"
+  bucket = "${var.prefix}-${var.environment}-app"
 }
 
 resource "aws_s3_bucket_versioning" "app" {

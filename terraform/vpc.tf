@@ -21,7 +21,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = false # explicitly disabled — assign EIPs manually
 
   tags = {
-    Name = "${var.project_name}-public-${var.availability_zones[count.index]}"
+    Name = "${var.prefix}-public-${var.availability_zones[count.index]}"
     Tier = "public"
   }
 }
@@ -33,7 +33,7 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = {
-    Name = "${var.project_name}-private-${var.availability_zones[count.index]}"
+    Name = "${var.prefix}-private-${var.availability_zones[count.index]}"
     Tier = "private"
   }
 }
@@ -46,7 +46,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-igw"
+    Name = "${var.prefix}-igw"
   }
 }
 
@@ -59,7 +59,7 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 
   tags = {
-    Name = "${var.project_name}-nat-eip-${var.availability_zones[count.index]}"
+    Name = "${var.prefix}-nat-eip-${var.availability_zones[count.index]}"
   }
 }
 
@@ -69,7 +69,7 @@ resource "aws_nat_gateway" "main" {
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name = "${var.project_name}-nat-${var.availability_zones[count.index]}"
+    Name = "${var.prefix}-nat-${var.availability_zones[count.index]}"
   }
 
   depends_on = [aws_internet_gateway.main]
@@ -88,7 +88,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.project_name}-public-rt"
+    Name = "${var.prefix}-public-rt"
   }
 }
 
@@ -108,7 +108,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "${var.project_name}-private-rt-${var.availability_zones[count.index]}"
+    Name = "${var.prefix}-private-rt-${var.availability_zones[count.index]}"
   }
 }
 
@@ -123,12 +123,12 @@ resource "aws_route_table_association" "private" {
 ################################################################################
 
 resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
-  name              = "/aws/vpc/flow-logs/${var.project_name}"
+  name              = "/aws/vpc/flow-logs/${var.prefix}"
   retention_in_days = 30
 }
 
 resource "aws_iam_role" "vpc_flow_logs" {
-  name = "${var.project_name}-vpc-flow-logs-role"
+  name = "${var.prefix}-vpc-flow-logs-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -143,7 +143,7 @@ resource "aws_iam_role" "vpc_flow_logs" {
 }
 
 resource "aws_iam_role_policy" "vpc_flow_logs" {
-  name = "${var.project_name}-vpc-flow-logs-policy"
+  name = "${var.prefix}-vpc-flow-logs-policy"
   role = aws_iam_role.vpc_flow_logs.id
 
   policy = jsonencode({

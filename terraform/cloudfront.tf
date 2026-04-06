@@ -3,7 +3,7 @@
 ################################################################################
 
 resource "aws_cloudfront_origin_access_control" "app" {
-  name                              = "${var.project_name}-oac"
+  name                              = "${var.prefix}-oac"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -84,7 +84,7 @@ data "aws_cloudfront_origin_request_policy" "cors_s3" {
 ################################################################################
 
 resource "aws_cloudfront_response_headers_policy" "security" {
-  name = "${var.project_name}-security-headers"
+  name = "${var.prefix}-security-headers"
 
   security_headers_config {
     content_type_options {
