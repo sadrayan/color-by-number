@@ -39,3 +39,9 @@ variable "domain_name" {
   type        = string
   default     = ""
 }
+
+variable "github_repo" {
+  description = "GitHub repository in 'org/repo' format used to scope the OIDC trust policy"
+  type        = string
+  default     = "sadrayan/color-by-number"
+}

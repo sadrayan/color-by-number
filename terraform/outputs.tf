@@ -13,6 +13,11 @@ output "s3_bucket_name" {
   value       = aws_s3_bucket.app.id
 }
 
+output "github_actions_role_arn" {
+  description = "IAM role ARN to set as AWS_ROLE_ARN in GitHub Actions environment secrets"
+  value       = aws_iam_role.github_actions_deploy.arn
+}
+
 output "vpc_id" {
   description = "VPC ID"
   value       = aws_vpc.main.id
