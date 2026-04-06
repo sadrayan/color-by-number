@@ -34,11 +34,16 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # Restrict to pushes on main branch only — PRs and forks cannot assume this role
+    # Allow both the branch ref (build job) and environment claim (deploy job).
+    # When a workflow uses a GitHub Environment, GitHub sets sub to
+    # "repo:ORG/REPO:environment:NAME" instead of "repo:ORG/REPO:ref:refs/heads/BRANCH".
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:ref:refs/heads/main"]
+      values = [
+        "repo:${var.github_repo}:ref:refs/heads/main",
+        "repo:${var.github_repo}:environment:production",
+      ]
     }
   }
 }
