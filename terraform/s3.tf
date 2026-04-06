@@ -69,3 +69,22 @@ resource "aws_s3_bucket_policy" "app" {
 
   depends_on = [aws_s3_bucket_public_access_block.app]
 }
+
+# Lifecycle rule — expire non-current versions to prevent storage cost creep
+resource "aws_s3_bucket_lifecycle_configuration" "app" {
+  bucket = aws_s3_bucket.app.id
+
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days           = 30
+      newer_noncurrent_versions = 3
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}

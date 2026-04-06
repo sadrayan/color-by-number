@@ -18,6 +18,7 @@ resource "aws_cloudfront_distribution" "app" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   price_class         = "PriceClass_100" # US, Canada, Europe
+  web_acl_id          = aws_wafv2_web_acl.cloudfront.arn
 
   origin {
     domain_name              = aws_s3_bucket.app.bucket_regional_domain_name
@@ -42,14 +43,14 @@ resource "aws_cloudfront_distribution" "app" {
     error_code            = 403
     response_code         = 200
     response_page_path    = "/index.html"
-    error_caching_min_ttl = 10
+    error_caching_min_ttl = 300
   }
 
   custom_error_response {
     error_code            = 404
     response_code         = 200
     response_page_path    = "/index.html"
-    error_caching_min_ttl = 10
+    error_caching_min_ttl = 300
   }
 
   restrictions {
